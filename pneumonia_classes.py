@@ -1,13 +1,11 @@
 import random
-import datetime
 from pathlib import Path
 from statistics import mean
 
-import torch
 from PIL import Image
 
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 import matplotlib.pyplot as plt
 
@@ -53,15 +51,19 @@ class PneumoniaDataset(Dataset):
         return transforms.Compose(transform_list)
 
 class PneumoniaClassifier():
-    def __init__(self, model, train_data, val_data,
-                 num_epochs, learning_rate):
+    def __init__(self, model:torch.nn.Module,
+                 train_data: DataLoader,
+                 val_data: DataLoader,
+                 num_epochs: int,
+                 learning_rate: float,
+                 patience: int):
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
-        print(str(self.model) + 2 * '\n')
         self.train_data = train_data
         self.val_data = val_data
         self.num_epochs = num_epochs
+        self.patience = patience
         self.loss_function = torch.nn.BCELoss()
         self.optimizer = torch.optim.SGD(
             self.model.parameters(),
@@ -71,6 +73,7 @@ class PneumoniaClassifier():
         self.val_losses = []
         self.train_accuracies = []
         self.val_accuracies = []
+        print(str(self.model) + 2 * '\n')
 
     def _get_accuracies(self, pred, y):
         """Compute the classification accuracy for a set of predictions."""

@@ -14,6 +14,7 @@ num_epochs = 2
 learning_rate = 1e-3
 debug_size = True
 batch_size = 32
+patience = 5
 plot_time = str(datetime.now().year)[2:] + str(datetime.now().month) + \
             str(datetime.now().day) + '-' + str(datetime.now().hour) + \
             str(datetime.now().minute)
@@ -21,6 +22,12 @@ plot_dir = 'plots'
 plot_name = (plot_dir + '/debug_size_' + str(debug_size).lower() + '_epochs_' +
              str(num_epochs) + '_lr_' + str(learning_rate) + '_img_size_' +
              str(img_size) + plot_time + '.png')
+best_model_dir = 'best_model'
+hyperparameters = {'img_size': img_size,
+                  'num_epochs': num_epochs,
+                  'batch_size': batch_size,
+                  'early_stopping_patience': patience,
+                  'learning_rate': learning_rate}
 
 dataset = PneumoniaDataset(data_path,
                            img_size=img_size,
@@ -37,9 +44,12 @@ test_loader = DataLoader(dataset=test,
                          shuffle=True)
 
 model = VeryBasicNN(img_size=img_size)
-classifier = PneumoniaClassifier(model=model, train_data=train_loader,
-                                 val_data=val_loader, num_epochs=num_epochs,
-                                 learning_rate=learning_rate)
+classifier = PneumoniaClassifier(model=model,
+                                 train_data=train_loader,
+                                 val_data=val_loader,
+                                 num_epochs=num_epochs,
+                                 learning_rate=learning_rate,
+                                 patience=patience)
 classifier.train_network()
 classifier.plot_and_save_losses(plot_name=plot_name)
 
