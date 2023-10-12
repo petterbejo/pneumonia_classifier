@@ -6,7 +6,9 @@ from datetime import datetime
 from torch.utils.data import random_split, DataLoader
 
 from cnn_architectures import VeryBasicNN
-from pneumonia_classes import PneumoniaDataset, PneumoniaClassifier
+from pneumonia_classes import PneumoniaDataset
+from pneumonia_classes import PneumoniaClassifier
+from pneumonia_classes import PerformanceWriter
 
 data_path = 'data/data'
 img_size = (768, 768)
@@ -22,7 +24,8 @@ plot_dir = 'plots'
 plot_name = (plot_dir + '/debug_size_' + str(debug_size).lower() + '_epochs_' +
              str(num_epochs) + '_lr_' + str(learning_rate) + '_img_size_' +
              str(img_size) + plot_time + '.png')
-best_model_dir = 'best_model'
+best_model_dir = 'best_models'
+best_model_file = 'performance.csv'
 hyperparameters = {'img_size': img_size,
                   'num_epochs': num_epochs,
                   'batch_size': batch_size,
@@ -52,5 +55,12 @@ classifier = PneumoniaClassifier(model=model,
                                  patience=patience)
 classifier.train_network()
 classifier.plot_and_save_losses(plot_name=plot_name)
-
-
+model_info, accuracy, model_state_dict = (
+    classifier.get_best_accuracy_and_model())
+writer = PerformanceWriter(performance_table_path=best_model_file,
+                           model_state_dict_directory=best_model_dir,
+                           model_state_dict_file=model_state_dict,
+                           model_info=model_info,
+                           hyperparameters=hyperparameters,
+                           accuracy=accuracy)
+writer.write_accuracy_and_hyperparameters_and_state_dict()

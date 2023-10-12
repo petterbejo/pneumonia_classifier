@@ -1,0 +1,2 @@
+img_size;num_epochs;batch_size;early_stopping_patience;learning_rate;accuracy;state_dict_name;model_info
+(768, 768);2;32;5;0.001;0.6000000238418579;1697092146765748;VeryBasicNN(  (flatten): Flatten(start_dim=1, end_dim=-1)  (linear_relu_stack): Sequential(    (0): Linear(in_features=589824, out_features=256, bias=True)    (1): ReLU()    (2): Linear(in_features=256, out_features=1, bias=True)  )  (sigmoid): Sigmoid())
