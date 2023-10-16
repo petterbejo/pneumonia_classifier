@@ -61,7 +61,7 @@ class PneumoniaClassifier():
                  val_data: DataLoader,
                  num_epochs: int,
                  learning_rate: float,
-                 patience: int):
+                 early_stopping_patience: [int, None] = None):
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.model = model.to(self.device)
@@ -69,7 +69,11 @@ class PneumoniaClassifier():
         self.train_data = train_data
         self.val_data = val_data
         self.num_epochs = num_epochs
-        self.patience = patience
+        if early_stopping_patience:
+            self.patience = early_stopping_patience
+        else:
+            self.patience = False
+
         self.loss_function = torch.nn.BCELoss()
         self.optimizer = torch.optim.SGD(
             self.model.parameters(),
@@ -91,6 +95,17 @@ class PneumoniaClassifier():
     def _compute_accuracies(self, pred, y):
         """Compute the classification accuracy for a set of predictions."""
         return float((pred.round() == y).float().mean())
+
+    def _trigger_early_stopping(self):
+        if not self.patience:
+            return False
+        if len(self.val_accuracies) <= self.patience:
+            return False
+        for acc in self.val_accuracies[-6:-1]:
+            if self.val_accuracies[-1] > acc:
+                return False
+        return True
+
 
     def _train_loop(self):
         """Perform the training step of an epoch."""
@@ -141,6 +156,10 @@ class PneumoniaClassifier():
             print(f'------- Epoch {e} -------')
             self._train_loop()
             self._eval_loop()
+            if self._trigger_early_stopping():
+                print("Early stopping triggered. Training stopped.")
+                self.num_epochs = e
+                break
 
         self.classifier_has_been_trained = True
 

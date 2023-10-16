@@ -52,7 +52,7 @@ classifier = PneumoniaClassifier(model=model,
                                  val_data=val_loader,
                                  num_epochs=num_epochs,
                                  learning_rate=learning_rate,
-                                 patience=patience)
+                                 early_stopping_patience=patience)
 classifier.train_network()
 classifier.plot_and_save_losses(plot_name=plot_name)
 model_info, accuracy, model_state_dict = (
